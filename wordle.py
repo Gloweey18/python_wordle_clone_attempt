@@ -1,20 +1,9 @@
 import random
+from rich.console import Console
 
-
-def split(delimiters, text):
-    """
-    Splits a string using all the delimiters supplied as input string
-    :param delimiters:
-    :param text: string containing delimiters to use to split the string, e.g. `,;? `
-    :return: a list of words from splitting text using the delimiters
-    """
-
-    import re
-    regex_pattern = '|'.join(map(re.escape, delimiters))
-    return re.split(regex_pattern, text, 0)
-
-
+console = Console(width = 40,color_system = 'windows')
 def get_words() :
+    '''Open text file and return a list of 5 letter words '''
     with open("words.txt","r") as my_words :
         data = my_words.read()
         word_list = data.split("\n")
@@ -22,21 +11,17 @@ def get_words() :
     return word_list
 
 def pick_word(word_list) :
+    '''Picks a random word
+    takes in a list of words and returns a randomly selcted one'''
     word_index = random.randint(0,len(word_list)-1)
     my_word = word_list[word_index]
-    word = my_word.lower()
+    word = my_word.upper()
     return word
-
-def make_guess_line(word) :
-    underscore_list=[]
-    for i in word :
-        underscore_list.append("_")
-    for j in underscore_list :
-        print(j,end='')
-    print("\n")
 
         
 def get_word(guess) :
+    '''Gets 5 letter input of the word guessed
+    takes in the the number of thimes the user has guessed'''
     while True :
         var = None
         guessed_word = input(f"Guess {guess} : ")
@@ -56,10 +41,11 @@ def get_word(guess) :
             continue
         elif var == True :
             break
-    return guessed_word.lower()
+    return guessed_word.upper()
 
 
 def check_word(word,guessed_word) :
+    '''Checks user guess against the randomly selcted word'''
     correct_letter = '-'
     incorrect_letter = '-'
     misplaced_letter = '-'
@@ -78,26 +64,67 @@ def check_word(word,guessed_word) :
         correct_letter = correct_letter.strip('-')
         incorrect_letter = incorrect_letter.strip('-')
         misplaced_letter = misplaced_letter.strip('-')
-        print(f"Correct letters : {correct_letter}")
-        print(f"Incorrect letters : {incorrect_letter}")
-        print(f"Misplaced letters : {misplaced_letter}")
-        return False
+        return False,correct_letter,incorrect_letter,misplaced_letter
 
 
 
 
 if __name__ == "__main__" :
-    print("Welcome to wordle you have 6 chances to play")
     guess = 0
+    words_guessed=["_____","_____","_____","_____","_____","_____",]
     word_list = get_words()
+    console.clear()
     word = pick_word(word_list)
+    alpha = []
+    correct = []
+    missed = []
+    alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+    console.rule(f"[bold red]:leafy_green: My Wordle Game:leafy_green:[/]\n")
+    print('~~ Welcome to a wordle game attempt coded using python ~~')
+    print('GREEN : CORRECT LETTERS')
+    print('YELLOW : MISPLACED LETTERS')
+    index = 0
+    for i in words_guessed:
+        print(i, end='\n')
+    print(alphabet)
     while guess < 6 :
         guess += 1
         guessed_word = get_word(guess)
+        words_guessed[index]=(guessed_word)
+        index += 1
+        console.clear()
+        console.rule(f"[bold red]:leafy_green: My Wordle Game:leafy_green:[/]\n")
         check=check_word(word,guessed_word)
-        if check == True :
+        for i in check[2]:
+            i=i.upper()
+            alpha.append(i)
+        for i in check[1]:
+            i=i.upper()
+            correct.append(i)
+        for i in check[3]:
+            i=i.upper()
+            missed.append(i)
+        for i in words_guessed:
+            for j in i:
+                if j in correct:
+                    console.print(f'[green]{j}[/green]',end='')
+                elif j in alpha:
+                    print(f'{j}',end='')
+                elif j in missed:
+                    console.print(f'[yellow]{j}[/yellow]',end='')
+                else:
+                    print(f"{j}",end='')
+            print(" ")
+        for i in alphabet:
+            if i in alpha:
+                console.print(f'[purple]{i}[/purple]',end='')
+            else:
+                print(f'{i}',end='')
+        print(" ")
+        if check[0] == True :
             print("You won!")
             break
+
     else:
         print("You lost!")
         print(f"The word was : {word}")
